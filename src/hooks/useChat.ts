@@ -1,20 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Message, ChatState, MenuParams, MenuItem, ValidValues, ConversationContext, ParsedResponse } from '@/types/chat';
-import { getMenuRecommendations, getValidValues, getMenuItems } from '@/lib/api';
+import { Message, MenuParams, ValidValues, } from '@/types/chat';
+import { getValidValues, getMenuItems } from '@/lib/api';
 import { parseUserInput, generateMenuRecommendation } from '@/lib/gemini';
-import ReactMarkdown from 'react-markdown';
-
-// Respuestas ficticias del bot para simular conversación
-const BOT_RESPONSES = [
-  "¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?",
-  "Entiendo tu consulta. Déjame procesarla...",
-  "Esa es una excelente pregunta. Te puedo ayudar con eso.",
-  "¡Por supuesto! Estoy aquí para asistirte.",
-  "Gracias por tu mensaje. ¿Hay algo más en lo que pueda ayudarte?",
-  "Me alegra poder conversar contigo. ¿Qué más te gustaría saber?",
-  "Perfecto, entiendo lo que necesitas. Te explico...",
-  "¡Excelente! Esa información te será muy útil."
-];
 
 const INITIAL_MENU_PARAMS: Partial<MenuParams> = {
   tipo_reunion: '',
@@ -25,17 +12,6 @@ const INITIAL_MENU_PARAMS: Partial<MenuParams> = {
   restricciones: "Ninguna",
   presupuesto: 0,
   solicitante: ''
-};
-
-const QUESTIONS = {
-  tipo_reunion: "¿Qué tipo de reunión estás organizando?",
-  sede: "¿En qué sede se realizará la reunión?",
-  fecha: "¿Qué fecha está programada para la reunión? (formato: DD/MM/YYYY)",
-  hora: "¿A qué hora comenzará la reunión? (formato: HH:MM)",
-  asistentes: "¿Cuántas personas asistirán a la reunión?",
-  restricciones: "¿Hay alguna restricción alimentaria que debamos considerar? (ej: vegetarianos, alérgicos, etc.)",
-  presupuesto: "¿Cuál es el presupuesto total disponible para el menú?",
-  solicitante: "¿Cuál es tu nombre de usuario?"
 };
 
 export const useChat = () => {
@@ -73,18 +49,6 @@ export const useChat = () => {
     };
     loadValidValues();
   }, []);
-
-  const checkIfComplete = (params: Partial<MenuParams>): boolean => {
-    return !!(
-      params.tipo_reunion &&
-      params.sede &&
-      params.fecha &&
-      params.hora &&
-      params.asistentes &&
-      params.presupuesto &&
-      params.solicitante
-    );
-  };
 
   const getMissingInfo = (params: Partial<MenuParams>): string[] => {
     const requiredFields: (keyof MenuParams)[] = [
