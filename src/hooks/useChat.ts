@@ -267,14 +267,7 @@ export const useChat = () => {
   }, [menuParams, validValues, isConnected]);
 
   const clearChat = useCallback(() => {
-    setMessages([
-      {
-        id: '1',
-        content: '¡Hola! Soy tu asistente para planificación de reuniones. ¿Qué tipo de reunión necesitas organizar?',
-        sender: 'bot',
-        timestamp: new Date()
-      }
-    ]);
+    setMessages([]);
     setMenuParams(INITIAL_MENU_PARAMS);
   }, []);
 
