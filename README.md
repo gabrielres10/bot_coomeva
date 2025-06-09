@@ -1,4 +1,4 @@
-# Nimble Conversation Hub
+# Coomeva chatbot
 
 Este proyecto es un asistente virtual conversacional diseñado para ayudar en la planificación de reuniones, específicamente en la recomendación de opciones de menú para eventos. Utiliza la API de Gemini para un procesamiento de lenguaje natural avanzado y una base de datos PostgreSQL para almacenar y gestionar información de menús, sedes, ciudades y proveedores.
 
