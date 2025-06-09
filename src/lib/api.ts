@@ -1,72 +1,90 @@
 import { MenuParams, MenuItem, ValidValues } from '@/types/chat';
-
-// Usar la URL del servidor de desarrollo por defecto
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-
-// Función auxiliar para manejar errores de conexión
-const handleApiError = (error: unknown) => {
-  console.error('API Error:', error);
-  if (error instanceof Error) {
-    if (error.message.includes('Failed to fetch')) {
-      throw new Error('Sin conexión al servidor. Por favor, asegúrate de que el servidor esté corriendo.');
-    }
-  }
-  throw error;
-};
+import { supabase } from './supabase';
 
 export const getValidValues = async (): Promise<ValidValues> => {
   try {
-    console.log('Fetching valid values from:', `${API_URL}/api/valid-values`);
-    const response = await fetch(`${API_URL}/api/valid-values`);
-    if (!response.ok) {
-      throw new Error('Error al obtener valores válidos');
-    }
-    const data = await response.json();
-    console.log('Valid values response:', data);
-    return data;
+    // Obtener tipos de menú
+    const { data: tiposData, error: tiposError } = await supabase
+      .from('menu_proveedor')
+      .select('tipo');
+
+    if (tiposError) throw tiposError;
+
+    // Obtener sedes
+    const { data: sedesData, error: sedesError } = await supabase
+      .from('sede')
+      .select('id, nombre');
+
+    if (sedesError) throw sedesError;
+
+    // Obtener ciudades
+    const { data: ciudadesData, error: ciudadesError } = await supabase
+      .from('ciudad')
+      .select('id, nombre');
+
+    if (ciudadesError) throw ciudadesError;
+
+    // Obtener proveedores
+    const { data: proveedoresData, error: proveedoresError } = await supabase
+      .from('proveedor')
+      .select('id, nombre');
+
+    if (proveedoresError) throw proveedoresError;
+
+    // Filtrar tipos únicos
+    const tiposUnicos = [...new Set(tiposData.map((row: { tipo: string }) => row.tipo))];
+
+    return {
+      tipos: tiposUnicos,
+      sedes: sedesData,
+      ciudades: ciudadesData,
+      proveedores: proveedoresData
+    };
   } catch (error) {
-    handleApiError(error);
+    console.error('Error getting valid values:', error);
     throw error;
   }
 };
 
-export const getMenuItems = async (): Promise<MenuItem[]> => {
+export const getMenuItems = async (params?: Partial<MenuParams>): Promise<MenuItem[]> => {
   try {
-    console.log('Fetching menu items from:', `${API_URL}/api/menu-recommendations`);
-    const response = await fetch(`${API_URL}/api/menu-recommendations`);
-    if (!response.ok) {
-      console.error('Error response:', response.status, response.statusText);
-      const errorText = await response.text();
-      console.error('Error details:', errorText);
-      throw new Error('Error al obtener menús');
-    }
-    const data = await response.json();
-    console.log('Menu items response:', data);
-    return data;
-  } catch (error) {
-    handleApiError(error);
-    throw error;
-  }
-};
+    let query = supabase
+      .from('menu_proveedor')
+      .select(`
+        id,
+        plato,
+        descripcion,
+        precio,
+        tipo,
+        proveedor:proveedor_id (nombre),
+        ciudad:proveedor_id (ciudad:ciudad_id (nombre))
+      `);
 
-export const getMenuRecommendations = async (params: MenuParams): Promise<MenuItem[]> => {
-  try {
-    const queryParams = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== null && value !== undefined) {
-        queryParams.append(key, value.toString());
-      }
-    });
-
-    const response = await fetch(`${API_URL}/api/menu-recommendations?${queryParams}`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch menu recommendations');
+    if (params?.tipo_reunion) {
+      query = query.eq('tipo', params.tipo_reunion);
     }
 
-    return await response.json();
+    if (params?.presupuesto && params?.asistentes) {
+      query = query.lte('precio', params.presupuesto / params.asistentes);
+    }
+
+    const { data, error } = await query.order('precio', { ascending: true });
+
+    if (error) throw error;
+
+    return data.map((item: any) => ({
+      id: item.id,
+      plato: item.plato,
+      descripcion: item.descripcion,
+      tipo: item.tipo,
+      precio: item.precio,
+      restricciones: [], // Esto se puede agregar si es necesario
+      proveedor: item.proveedor?.nombre || '',
+      sede: '', // Esto se puede agregar si es necesario
+      ciudad: item.ciudad?.ciudad?.nombre || ''
+    }));
   } catch (error) {
-    console.error('Error fetching menu recommendations:', error);
+    console.error('Error getting menu items:', error);
     throw error;
   }
 }; 
