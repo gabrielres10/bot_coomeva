@@ -155,10 +155,14 @@ La aplicación frontend se iniciará en `http://localhost:5173` (o el puerto pre
 
 Abre tu navegador y accede a la URL donde se está ejecutando el frontend. Comienza a chatear con el asistente virtual para planificar tu reunión. Puedes especificar el tipo de reunión, fecha, hora, número de asistentes, restricciones alimentarias, presupuesto y el nombre del solicitante. El asistente te guiará y proporcionará recomendaciones de menú personalizadas.
 
+## Despliegue
+
+El asistente virtual está disponible públicamente en el siguiente enlace:
+
+🔗 [https://bot-coomeva.vercel.app/](https://bot-coomeva.vercel.app/)
+
+Puedes acceder directamente desde tu navegador para probar las funcionalidades del chatbot sin necesidad de instalarlo localmente.
+
 ## Contribución
 
 Si deseas contribuir a este proyecto, por favor, haz un fork del repositorio y envía un pull request.
-
-## Licencia
-
-Este proyecto está licenciado bajo la licencia MIT.
